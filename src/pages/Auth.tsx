@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Phone, Home, MapPin } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get('mode');
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -32,7 +35,10 @@ const Auth = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    fullName: ''
+    fullName: '',
+    phone: '',
+    address: '',
+    deliveryReferences: ''
   });
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -83,8 +89,14 @@ const Auth = () => {
     }
 
     try {
-      const { error } = await signUp(signUpData.email, signUpData.password, signUpData.fullName);
-      
+      const { error } = await signUp(
+        signUpData.email,
+        signUpData.password,
+        signUpData.fullName,
+        signUpData.phone,
+        signUpData.address,
+        signUpData.deliveryReferences
+      );      
       if (error) {
         if (error.message.includes('User already registered')) {
           setError('Este email ya está registrado. Intenta iniciar sesión.');
@@ -120,8 +132,8 @@ const Auth = () => {
           <p className="text-muted-foreground">Tu supermercado de confianza</p>
         </div>
 
-        <Tabs defaultValue="signin" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue={mode === 'register' ? 'signup' : 'signin'} className="space-y-4">          
+            <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Iniciar Sesión</TabsTrigger>
             <TabsTrigger value="signup">Registrarse</TabsTrigger>
           </TabsList>
@@ -220,6 +232,51 @@ const Auth = () => {
                         onChange={(e) => setSignUpData(prev => ({ ...prev, email: e.target.value }))}
                         className="pl-10"
                         required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-phone">Teléfono</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                        <Input
+                          id="signup-phone"
+                          type="tel"
+                          placeholder="Tu teléfono"
+                          value={signUpData.phone}
+                          onChange={(e) => setSignUpData(prev => ({ ...prev, phone: e.target.value }))}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-address">Dirección</Label>
+                      <div className="relative">
+                        <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                        <Input
+                          id="signup-address"
+                          type="text"
+                          placeholder="Tu dirección"
+                          value={signUpData.address}
+                          onChange={(e) => setSignUpData(prev => ({ ...prev, address: e.target.value }))}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                  <Label htmlFor="signup-delivery-references">Referencias de Domicilio</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-3 text-muted-foreground h-4 w-4" />
+                      <Textarea
+                        id="signup-delivery-references"
+                        placeholder="Ej: Casa de dos pisos, color azul, portón negro..."
+                        value={signUpData.deliveryReferences}
+                        onChange={(e) => setSignUpData(prev => ({ ...prev, deliveryReferences: e.target.value }))}
+                        className="pl-10"
                       />
                     </div>
                   </div>

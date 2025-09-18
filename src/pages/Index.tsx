@@ -257,7 +257,7 @@ const Index = () => {
             Registrate ahora y disfruta de ofertas exclusivas
           </p>
           <Button asChild size="lg" variant="secondary" className="text-lg px-8">
-            <Link to="/auth">Crear Cuenta</Link>
+            <Link to="/auth?mode=register">Crear Cuenta</Link>
           </Button>
         </section>
       </div>
